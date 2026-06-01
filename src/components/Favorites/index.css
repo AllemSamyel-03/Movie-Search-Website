@@ -1,0 +1,17 @@
+.favorites-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.favorites-count {
+  margin: 0;
+  color: #f5c518;
+  font-weight: 700;
+  border: 1px solid rgba(245, 197, 24, 0.5);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background-color: rgba(245, 197, 24, 0.08);
+}
