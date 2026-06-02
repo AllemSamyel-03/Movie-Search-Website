@@ -175,9 +175,19 @@ const Home = () => {
               </strong>
               and more are ready with simple search and quick watchlist saving.
             </p>
-            <a href="#formSection" className="anchor">
+            {/* <a href="#formSection" className="anchor">
               Search Movies
-            </a>
+            </a> */}
+            <button
+              className="anchor"
+              onClick={() => {
+                document
+                  .getElementById("formSection")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Search Movies
+            </button>
           </div>
         </section>
         <div id="formSection" className="search-movies"></div>
