@@ -181,6 +181,7 @@ const Home = () => {
             </a> */}
 
             <button
+              type="button"
               className="anchor"
               onClick={() => {
                 document
