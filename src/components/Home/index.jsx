@@ -175,9 +175,7 @@ const Home = () => {
               </strong>
               and more are ready with simple search and quick watchlist saving.
             </p>
-            {/* <a href="#formSection" className="anchor">
-              Search Movies
-            </a> */}
+
             <button
               className="anchor"
               onClick={() => {
