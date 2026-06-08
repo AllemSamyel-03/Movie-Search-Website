@@ -1,4 +1,6 @@
 import { use } from "react";
+import { Link } from "react-router";
+import { FiHeart } from "react-icons/fi";
 import Header from "../Header";
 import MovieList from "../MovieList";
 import Footer from "../Footer";
@@ -20,10 +22,14 @@ const Favorites = () => {
           <MovieList moviesList={favoritesList} />
         ) : (
           <div className="empty-container">
+            <FiHeart className="empty-favorites-icon" />
             <h1>No favorites yet</h1>
             <p>
               Add movies to your watchlist from the home page or details page.
             </p>
+            <Link to="/" className="favorites-home-button">
+              Home
+            </Link>
           </div>
         )}
       </main>

@@ -17,8 +17,17 @@ const getStoredUser = () => {
 };
 
 const getStoredFavorites = () => {
-  const storedFavorites = localStorage.getItem("movie_app_favorites");
-  return storedFavorites !== null ? JSON.parse(storedFavorites) : [];
+  const storedUser = getStoredUser();
+
+  if (storedUser === null) {
+    return [];
+  }
+
+  const storedFavoritesMap = localStorage.getItem("movie_app_user_favorites");
+  const favoritesMap =
+    storedFavoritesMap !== null ? JSON.parse(storedFavoritesMap) : {};
+
+  return favoritesMap[storedUser.email] || [];
 };
 
 const App = () => {
@@ -26,8 +35,22 @@ const App = () => {
   const [favoritesList, setFavoritesList] = useState(getStoredFavorites());
 
   useEffect(() => {
-    localStorage.setItem("movie_app_favorites", JSON.stringify(favoritesList));
-  }, [favoritesList]);
+    if (user !== null) {
+      const storedFavoritesMap = localStorage.getItem(
+        "movie_app_user_favorites",
+      );
+      const favoritesMap =
+        storedFavoritesMap !== null ? JSON.parse(storedFavoritesMap) : {};
+      const updatedFavoritesMap = {
+        ...favoritesMap,
+        [user.email]: favoritesList,
+      };
+      localStorage.setItem(
+        "movie_app_user_favorites",
+        JSON.stringify(updatedFavoritesMap),
+      );
+    }
+  }, [favoritesList, user]);
 
   const signupUser = (userDetails) => {
     const usersList = JSON.parse(localStorage.getItem("movie_app_users")) || [];
@@ -40,9 +63,18 @@ const App = () => {
     }
 
     const updatedUsersList = [...usersList, userDetails];
+    const storedFavoritesMap = localStorage.getItem("movie_app_user_favorites");
+    const favoritesMap =
+      storedFavoritesMap !== null ? JSON.parse(storedFavoritesMap) : {};
+    const updatedFavoritesMap = { ...favoritesMap, [userDetails.email]: [] };
     localStorage.setItem("movie_app_users", JSON.stringify(updatedUsersList));
+    localStorage.setItem(
+      "movie_app_user_favorites",
+      JSON.stringify(updatedFavoritesMap),
+    );
     localStorage.setItem("movie_app_logged_user", JSON.stringify(userDetails));
     setUser(userDetails);
+    setFavoritesList([]);
     return { isSuccess: true };
   };
 
@@ -60,12 +92,32 @@ const App = () => {
 
     localStorage.setItem("movie_app_logged_user", JSON.stringify(matchedUser));
     setUser(matchedUser);
+    const storedFavoritesMap = localStorage.getItem("movie_app_user_favorites");
+    const favoritesMap =
+      storedFavoritesMap !== null ? JSON.parse(storedFavoritesMap) : {};
+    setFavoritesList(favoritesMap[matchedUser.email] || []);
     return { isSuccess: true };
   };
 
   const logoutUser = () => {
+    if (user !== null) {
+      const storedFavoritesMap = localStorage.getItem(
+        "movie_app_user_favorites",
+      );
+      const favoritesMap =
+        storedFavoritesMap !== null ? JSON.parse(storedFavoritesMap) : {};
+      const updatedFavoritesMap = {
+        ...favoritesMap,
+        [user.email]: favoritesList,
+      };
+      localStorage.setItem(
+        "movie_app_user_favorites",
+        JSON.stringify(updatedFavoritesMap),
+      );
+    }
     localStorage.removeItem("movie_app_logged_user");
     setUser(null);
+    setFavoritesList([]);
   };
 
   const toggleFavorite = (movieDetails) => {
@@ -85,18 +137,18 @@ const App = () => {
   const isFavoriteMovie = (movieId) =>
     favoritesList.some((eachMovie) => eachMovie.id === movieId);
 
+  const contextvalue = {
+    user,
+    favoritesList,
+    loginUser,
+    signupUser,
+    logoutUser,
+    toggleFavorite,
+    isFavoriteMovie,
+  };
+
   return (
-    <MovieContext.Provider
-      value={{
-        user,
-        favoritesList,
-        loginUser,
-        signupUser,
-        logoutUser,
-        toggleFavorite,
-        isFavoriteMovie,
-      }}
-    >
+    <MovieContext.Provider value={contextvalue}>
       <HashRouter>
         <ScrollToTop />
         <Routes>
@@ -126,7 +178,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<NotFound user={user} />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
     </MovieContext.Provider>

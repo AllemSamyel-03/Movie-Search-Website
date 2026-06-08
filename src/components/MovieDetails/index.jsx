@@ -1,6 +1,6 @@
 import { useEffect, useState, use } from "react";
 import { Link, useParams } from "react-router";
-import { FiArrowLeft, FiHeart, FiStar } from "react-icons/fi";
+import { FiArrowLeft, FiHeart, FiPlay, FiStar } from "react-icons/fi";
 import Header from "../Header";
 import MovieList from "../MovieList";
 import Footer from "../Footer";
@@ -27,6 +27,7 @@ const MovieDetails = () => {
   const { id } = useParams();
   const [movieDetails, setMovieDetails] = useState({});
   const [similarMoviesList, setSimilarMoviesList] = useState([]);
+  const [trailerUrl, setTrailerUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const { toggleFavorite, isFavoriteMovie } = use(MovieContext);
@@ -38,8 +39,10 @@ const MovieDetails = () => {
 
       const detailsUrl = `${BASE_URL}/movie/${id}?api_key=${API_KEY}`;
       const similarMoviesUrl = `${BASE_URL}/movie/${id}/similar?api_key=${API_KEY}`;
+      const videosUrl = `${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`;
       const detailsResponse = await fetch(detailsUrl);
       const similarResponse = await fetch(similarMoviesUrl);
+      const videosResponse = await fetch(videosUrl);
 
       if (detailsResponse.ok && similarResponse.ok) {
         const detailsData = await detailsResponse.json();
@@ -58,6 +61,21 @@ const MovieDetails = () => {
         setSimilarMoviesList(
           similarData.results.slice(0, 10).map(formatMovieData),
         );
+
+        if (videosResponse.ok) {
+          const videosData = await videosResponse.json();
+          const trailerDetails = videosData.results.find(
+            (eachVideo) =>
+              eachVideo.site === "YouTube" && eachVideo.type === "Trailer",
+          );
+          setTrailerUrl(
+            trailerDetails
+              ? `https://www.youtube.com/watch?v=${trailerDetails.key}`
+              : "",
+          );
+        } else {
+          setTrailerUrl("");
+        }
       } else {
         setErrorMsg("Unable to load movie details.");
       }
@@ -154,6 +172,16 @@ const MovieDetails = () => {
               >
                 <FiHeart /> {isFavorite ? "Remove Favorite" : "Add Watchlist"}
               </button>
+              {trailerUrl !== "" && (
+                <a
+                  href={trailerUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="trailer-button"
+                >
+                  <FiPlay /> Watch Trailer
+                </a>
+              )}
             </div>
           </div>
         </section>
